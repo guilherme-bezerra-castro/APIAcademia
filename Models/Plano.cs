@@ -1,12 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace APIAcademia.Models;
 
 [Table("Planos")]
 public class Plano
 {
+    public Plano()
+    {
+        Alunos = new Collection<Aluno>();
+    }
+
     [Key]
     public int PlanoId { get; set; }
 
