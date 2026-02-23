@@ -80,7 +80,7 @@ namespace APIAcademia.Migrations
                         .HasColumnType("varchar(300)");
 
                     b.Property<decimal>("Mensalidade")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("PlanoNome")
                         .IsRequired()

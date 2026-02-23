@@ -27,6 +27,8 @@ public class Plano
     [StringLength(400)]
     public string? Descricao { get; set; }
 
+    [Required]
+    [Column(TypeName = "decimal(10,2)")]
     public decimal Mensalidade { get; set; }
 
     public ICollection<Aluno>? Alunos { get; set; }

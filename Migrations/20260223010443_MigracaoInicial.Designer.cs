@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APIAcademia.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260222231747_MigracaoInicial")]
+    [Migration("20260223010443_MigracaoInicial")]
     partial class MigracaoInicial
     {
         /// <inheritdoc />
@@ -83,7 +83,7 @@ namespace APIAcademia.Migrations
                         .HasColumnType("varchar(300)");
 
                     b.Property<decimal>("Mensalidade")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("PlanoNome")
                         .IsRequired()
