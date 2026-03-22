@@ -107,6 +107,7 @@ C:\Users\guilh\Desktop\csharp\APIAcademia\APIAcademia\obj\Debug\net8.0\staticweb
 C:\Users\guilh\Desktop\csharp\APIAcademia\APIAcademia\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\guilh\Desktop\csharp\APIAcademia\APIAcademia\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 C:\Users\guilh\Desktop\csharp\APIAcademia\APIAcademia\obj\Debug\net8.0\swae.build.ex.cache
+C:\Users\guilh\Desktop\csharp\APIAcademia\APIAcademia\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\guilh\Desktop\csharp\APIAcademia\APIAcademia\obj\Debug\net8.0\APIAcade.5306CE2B.Up2Date
 C:\Users\guilh\Desktop\csharp\APIAcademia\APIAcademia\obj\Debug\net8.0\APIAcademia.dll
 C:\Users\guilh\Desktop\csharp\APIAcademia\APIAcademia\obj\Debug\net8.0\refint\APIAcademia.dll
