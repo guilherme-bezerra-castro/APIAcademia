@@ -1,10 +1,7 @@
 ﻿using APIAcademia.Context;
 using APIAcademia.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing.Matching;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics.CodeAnalysis;
 
 namespace APIAcademia.Controllers
 {
@@ -58,12 +55,20 @@ namespace APIAcademia.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post(Plano plano)
+        public ActionResult Post(CriarPlanoDTO dto)
         {
-            if (plano is null)
+            if (dto is null)
             {
                 return BadRequest();
             }
+
+            var plano = new Plano
+            {
+                PlanoNome = dto.PlanoNome,
+                ImagemURL = dto.ImagemURL,
+                Descricao = dto.Descricao,
+                Mensalidade = dto.Mensalidade
+            };
 
             _context.Planos.Add(plano);
             _context.SaveChanges();
@@ -72,14 +77,19 @@ namespace APIAcademia.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Put(int id, Plano plano)
+        public ActionResult Put(int id, CriarPlanoDTO dto)
         {
-            if (id != plano.PlanoId)
+            var plano = _context.Planos.FirstOrDefault(p => p.PlanoId == id);
+            if (plano is null)
             {
-                return BadRequest();
+                return NotFound("Plano não localizado.");
             }
 
-            _context.Entry(plano).State = EntityState.Modified;
+            plano.PlanoNome = dto.PlanoNome;
+            plano.ImagemURL = dto.ImagemURL;
+            plano.Descricao = dto.Descricao;
+            plano.Mensalidade = dto.Mensalidade;
+
             _context.SaveChanges();
 
             return Ok(plano);
@@ -101,4 +111,7 @@ namespace APIAcademia.Controllers
             return Ok(plano);
         }
     }
+
+    public record CriarPlanoDTO(string PlanoNome, string ImagemURL, string Descricao, decimal Mensalidade);
+
 }
