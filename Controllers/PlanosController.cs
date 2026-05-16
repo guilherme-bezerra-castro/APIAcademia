@@ -12,7 +12,7 @@ namespace APIAcademia.Controllers
         private readonly AppDbContext _context;
 
         public PlanosController(AppDbContext context)
-        { 
+        {
             _context = context;
         }
 
@@ -31,7 +31,7 @@ namespace APIAcademia.Controllers
                 return Ok(planos);
             }
             catch (Exception)
-            { 
+            {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar a sua solicitação.");
             }
         }
@@ -111,7 +111,4 @@ namespace APIAcademia.Controllers
             return Ok(plano);
         }
     }
-
-    public record CriarPlanoDTO(string PlanoNome, string ImagemURL, string Descricao, decimal Mensalidade);
-
 }

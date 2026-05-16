@@ -132,7 +132,4 @@ namespace APIAcademia.Controllers
             return Ok(aluno);
         }
     }
-
-    // Criação de Inline DTOs
-    public record CriarAlunoDTO(string Nome, string ImagemURL, string Email, DateTime DataNascimento, bool Ativo, int PlanoId);
 }
