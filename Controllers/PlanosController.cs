@@ -1,4 +1,5 @@
 ﻿using APIAcademia.Context;
+using APIAcademia.DTOs.Planos;
 using APIAcademia.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -55,7 +56,7 @@ namespace APIAcademia.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post(CriarPlanoDTO dto)
+        public ActionResult Post(PlanoRequestDTO dto)
         {
             if (dto is null)
             {
@@ -77,7 +78,7 @@ namespace APIAcademia.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Put(int id, CriarPlanoDTO dto)
+        public ActionResult Put(int id, PlanoRequestDTO dto)
         {
             var plano = _context.Planos.FirstOrDefault(p => p.PlanoId == id);
             if (plano is null)
