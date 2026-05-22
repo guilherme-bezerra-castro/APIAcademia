@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace APIAcademia.Models;
 
@@ -30,6 +29,5 @@ public class Aluno
 
     public int PlanoId { get; set; }
 
-    [JsonIgnore]
     public Plano? Planos { get; set; }
 }

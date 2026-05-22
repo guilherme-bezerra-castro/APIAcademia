@@ -1,7 +1,10 @@
 ﻿using APIAcademia.Context;
+using APIAcademia.DTOs.Alunos;
+using APIAcademia.Extensions;
 using APIAcademia.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 namespace APIAcademia.Controllers
 
 {
@@ -19,89 +22,82 @@ namespace APIAcademia.Controllers
 
         // alunos/primeiro
         [HttpGet("primeiro")]
-
-        public ActionResult<Aluno> GetPrimeiro()
+        public ActionResult<AlunoResponseDTO> GetPrimeiro()
         {
-            var aluno = _context.Alunos.FirstOrDefault();
+            // Include carrega Planos para PlanosNome funcionar no DTO 
+            var aluno = _context.Alunos.Include(a => a.Planos).AsNoTracking().FirstOrDefault();
 
             if (aluno is null)
             {
-                return NotFound();
+                return NotFound("Nenhum aluno cadastrado.");
             }
 
-            return aluno;
+            return Ok(aluno.ToResponseDTO());
         }
 
-
-
-        // /alunos
-
+        // alunos
         [HttpGet]
-
-        public ActionResult<IEnumerable<Aluno>> Get()
+        public ActionResult<IEnumerable<AlunoResponseDTO>> Get()
         {
-            var alunos = _context.Alunos.AsNoTracking().ToList();
+            var alunos = _context.Alunos.Include(a => a.Planos).AsNoTracking().ToList();
 
             if (alunos is null)
             {
-                return NotFound();
+                return NotFound("Nenhum aluno cadastrado.");
             }
 
-            return alunos;
+            return Ok(alunos.Select(a => a.ToResponseDTO()));
         }
 
-
-
         // /alunos/id
-
         [HttpGet("{id:int}", Name = "ObterAluno")]
-
-        public ActionResult<Aluno> Get(int id)
+        public ActionResult<AlunoResponseDTO> Get(int id)
         {
-            var aluno = _context.Alunos.FirstOrDefault(a => a.AlunoId == id);
+            var aluno = _context.Alunos.Include(a => a.Planos).AsNoTracking().FirstOrDefault(a => a.AlunoId == id);
 
             if (aluno is null)
             {
                 return NotFound("Aluno não encontrado.");
             }
 
-            return aluno;
+            return Ok(aluno.ToResponseDTO());
         }
 
+        // alunos
         [HttpPost]
-        public ActionResult Post(CriarAlunoDTO dto)
-        { 
-            if (dto is null)
+        public ActionResult<AlunoResponseDTO> Post(AlunoRequestDTO dto)
+        {
+            var planoExiste = _context.Planos.Any(p => p.PlanoId == dto.PlanoId);
+            if (!planoExiste)
             {
-                return BadRequest();
+                return BadRequest($"Plano com ID {dto.PlanoId} não encontrado.");
             }
 
-            var aluno = new Aluno
-            {
-                Nome = dto.Nome,
-                ImagemURL = dto.ImagemURL,
-                Email = dto.Email,
-                DataNascimento = dto.DataNascimento,
-                Ativo = dto.Ativo,
-                PlanoId = dto.PlanoId
-            };
-
+            var aluno = dto.ToModel();
+            
             _context.Alunos.Add(aluno);
             _context.SaveChanges();
 
-            return new CreatedAtRouteResult("ObterAluno", new { id = aluno.AlunoId }, aluno);
+            _context.Entry(aluno).Reference(a => a.Planos).Load();
+
+            return CreatedAtRoute("ObterAluno", new { id = aluno.AlunoId }, aluno.ToResponseDTO());
         }
 
-
-
+        // alunos/id
         [HttpPut("{id:int}")]
-        public ActionResult Put(int id, CriarAlunoDTO dto)
+        public ActionResult<AlunoResponseDTO> Put(int id, AlunoRequestDTO dto)
         {
             var aluno = _context.Alunos.FirstOrDefault(a => a.AlunoId == id);
 
             if (aluno is null)
             {
                 return NotFound("Aluno não encontrado.");
+            }
+
+            var planoExiste = _context.Planos.Any(p => p.PlanoId == dto.PlanoId);
+            if (!planoExiste)
+            {
+                return BadRequest($"Plano com ID {dto.PlanoId} não encontrado.");
             }
 
             aluno.Nome = dto.Nome;
@@ -112,10 +108,12 @@ namespace APIAcademia.Controllers
             aluno.PlanoId = dto.PlanoId;
 
             _context.SaveChanges();
+            _context.Entry(aluno).Reference(a => a.Planos).Load();
 
-            return Ok(aluno);
+            return Ok(aluno.ToResponseDTO());
         }
 
+        // alunos/id
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
@@ -129,7 +127,7 @@ namespace APIAcademia.Controllers
             _context.Alunos.Remove(aluno);
             _context.SaveChanges();
 
-            return Ok(aluno);
+            return Ok(new { mensagem = $"Aluno '{aluno.Nome}' removido com sucesso." });
         }
     }
 }
