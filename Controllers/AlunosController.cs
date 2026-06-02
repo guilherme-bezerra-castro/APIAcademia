@@ -63,6 +63,23 @@ namespace APIAcademia.Controllers
             return Ok(aluno.ToResponseDTO());
         }
 
+        // alunos/filtrar?ativo=true&planoId=1
+        [HttpGet("filtrar")]
+        public ActionResult<IEnumerable<AlunoResponseDTO>> Filtrar([FromQuery] bool? ativo, [FromQuery] int? planoId) 
+        {
+            var query = _context.Alunos.Include(a => a.Planos).AsNoTracking().AsQueryable();
+
+            if (ativo.HasValue)
+                query = query.Where(a => a.Ativo == ativo.Value);
+
+            if (planoId.HasValue)
+                query = query.Where(a => a.PlanoId == planoId.Value);
+
+            var resultado = query.ToList().Select(a => a.ToResponseDTO());
+
+            return Ok(resultado);
+        }
+
         // alunos
         [HttpPost]
         public ActionResult<AlunoResponseDTO> Post(AlunoRequestDTO dto)
