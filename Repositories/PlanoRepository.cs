@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace APIAcademia.Repositories
 {
-    public class PlanoRepository : IPlanoRepository, Repository<Plano>
+    public class PlanoRepository : Repository<Plano>, IPlanoRepository
     {
         public PlanoRepository(AppDbContext context) : base(context)
         {
