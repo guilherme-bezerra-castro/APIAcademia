@@ -4,10 +4,10 @@ namespace APIAcademia.Services
 {
     public interface IPlanoService
     {
-        IEnumerable<PlanoResponseDTO> ObterTodos();
-        PlanoResponseDTO? ObterPorId(int id);
-        PlanoResponseDTO Criar(PlanoRequestDTO dto);
-        PlanoResponseDTO? Atualizar(int id, PlanoRequestDTO dto);
-        bool Remover(int id);
+        public Task<IEnumerable<PlanoResponseDTO>> ObterTodosAsync();
+        public Task<PlanoResponseDTO?> ObterPorIdAsync(int id);
+        public Task<PlanoResponseDTO> CriarAsync(PlanoRequestDTO dto);
+        public Task<PlanoResponseDTO?> AtualizarAsync(int id, PlanoRequestDTO dto);
+        public Task<bool> RemoverAsync(int id);
     }
 }

@@ -1,61 +1,68 @@
-﻿using APIAcademia.Context;
-using APIAcademia.DTOs.Planos;
+﻿using APIAcademia.DTOs.Planos;
 using APIAcademia.Extensions;
-using Microsoft.EntityFrameworkCore;
+using APIAcademia.Repositories;
 
 namespace APIAcademia.Services
 {
     public class PlanoService : IPlanoService
     {
-        private readonly AppDbContext _context;
+        private readonly IPlanoRepository _planoRepository;
 
-        public PlanoService(AppDbContext context)
+        public PlanoService(IPlanoRepository planoRepository)
         {
-            _context = context;
+            _planoRepository = planoRepository;
         }
 
-        public PlanoResponseDTO? Atualizar(int id, PlanoRequestDTO dto)
+        public async Task<PlanoResponseDTO?> AtualizarAsync(int id, PlanoRequestDTO dto)
         {
-            var plano = _context.Planos.FirstOrDefault(p => p.PlanoId == id);
-            if (plano is null) return null;
+            var plano = await _planoRepository.ObterPorIdAsync(id);
+            if (plano is null) 
+                return null;
 
             plano.PlanoNome = dto.PlanoNome;
             plano.ImagemURL = dto.ImagemURL;
             plano.Descricao = dto.Descricao;
             plano.Mensalidade = dto.Mensalidade;
 
-            _context.SaveChanges();
+            await _planoRepository.AtualizarAsync(plano);
+            await _planoRepository.SalvarAsync();
+
             return plano.ToResponseDTO();
         }
 
-        public PlanoResponseDTO Criar(PlanoRequestDTO dto)
+        public async Task<PlanoResponseDTO> CriarAsync(PlanoRequestDTO dto)
         {
             var plano = dto.ToModel();
-            _context.Planos.Add(plano);
-            _context.SaveChanges();
+
+            await _planoRepository.CriarAsync(plano);
+            await _planoRepository.SalvarAsync();
 
             return plano.ToResponseDTO();
         }
 
-        public PlanoResponseDTO? ObterPorId(int id)
+        public async Task<PlanoResponseDTO?> ObterPorIdAsync(int id)
         {
-            var plano = _context.Planos.Include(p => p.Alunos).AsNoTracking().FirstOrDefault(p => p.PlanoId == id);
+            var plano = await _planoRepository.ObterPorIdComAlunosAsync(id);
 
             return plano?.ToResponseDTO();
         }
 
-        public IEnumerable<PlanoResponseDTO> ObterTodos()
+        public async Task<IEnumerable<PlanoResponseDTO>> ObterTodosAsync()
         {
-            return _context.Planos.Include(p => p.Alunos).AsNoTracking().ToList().Select(p => p.ToResponseDTO());
+            var planos = await _planoRepository.ObterTodosComAlunosAsync();
+        
+            return planos.Select(p => p.ToResponseDTO());
         }
 
-        public bool Remover(int id)
+        public async Task<bool> RemoverAsync(int id)
         {
-            var plano = _context.Planos.FirstOrDefault(p => p.PlanoId == id);
-            if (plano is null) return false;
+            var plano = await _planoRepository.ObterPorIdAsync(id);
+            if (plano is null) 
+                return false;
 
-            _context.Planos.Remove(plano);
-            _context.SaveChanges();
+            await _planoRepository.RemoverAsync(plano);
+            await _planoRepository.SalvarAsync();
+            
             return true;
         }
     }
