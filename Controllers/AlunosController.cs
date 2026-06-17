@@ -1,6 +1,7 @@
 ﻿using APIAcademia.Context;
 using APIAcademia.DTOs;
 using APIAcademia.DTOs.Alunos;
+using APIAcademia.DTOs.Planos;
 using APIAcademia.Extensions;
 using APIAcademia.Models;
 using APIAcademia.Services;
@@ -78,6 +79,14 @@ namespace APIAcademia.Controllers
         {
             var atualizado = await _alunoService.AtualizarAsync(id, dto);
 
+            return atualizado is null ? NotFound("Aluno não encontrado.") : Ok(atualizado);
+        }
+
+
+        [HttpPatch("{id:int}/status")]
+        public async Task<ActionResult<AlunoResponseDTO>> PatchStatus(int id, [FromBody] bool ativo)
+        {
+            var atualizado = await _alunoService.AtualizarStatusAsync(id, ativo);
             return atualizado is null ? NotFound("Aluno não encontrado.") : Ok(atualizado);
         }
 
