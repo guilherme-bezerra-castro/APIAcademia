@@ -1,4 +1,5 @@
 using APIAcademia.Context;
+using APIAcademia.Repositories;
 using APIAcademia.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,10 @@ string? mySqlConnection = builder.Configuration.GetConnectionString("DefaultConn
 builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
 
 builder.Services.AddScoped<IPlanoService, PlanoService>();
+builder.Services.AddScoped<IPlanoService, PlanoService>();
+
+builder.Services.AddScoped<IAlunoRepository, AlunoRepository>();
+builder.Services.AddScoped<IPlanoRepository, PlanoRepository>();
 
 var app = builder.Build();
 
