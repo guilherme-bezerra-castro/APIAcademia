@@ -3,6 +3,7 @@ using APIAcademia.DTOs.Planos;
 using APIAcademia.Extensions;
 using APIAcademia.Models;
 using APIAcademia.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ namespace APIAcademia.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize]
     public class PlanosController : ControllerBase
     {
         private readonly IPlanoService _planoService;
@@ -19,35 +21,39 @@ namespace APIAcademia.Controllers
             _planoService = planoService;
         }
 
+        // planos
         [HttpGet]
-        public ActionResult<IEnumerable<PlanoResponseDTO>> Get()
-            => Ok(_planoService.ObterTodos());
+        public async Task<ActionResult<IEnumerable<PlanoResponseDTO>>> Get()
+            => Ok(await _planoService.ObterTodosAsync());
 
+        // planos/{id}
         [HttpGet("{id:int}", Name = "ObterPlano")]
-        public ActionResult<PlanoResponseDTO> Get(int id)
+        public async Task<ActionResult<PlanoResponseDTO>> Get(int id)
         {
-            var plano = _planoService.ObterPorId(id);
+            var plano = await _planoService.ObterPorIdAsync(id);
             return plano is null ? NotFound($"Plano com ID {id} não encontrado.") : Ok(plano);
         }
 
+        // planos
         [HttpPost]
-        public ActionResult<PlanoResponseDTO> Post(PlanoRequestDTO dto)
+        public async Task<ActionResult<PlanoResponseDTO>> Post(PlanoRequestDTO dto)
         {
-            var criado = _planoService.Criar(dto);
+            var criado = await _planoService.CriarAsync(dto);
             return CreatedAtRoute("ObterPlano", new { id = criado.PlanoId }, criado);
         }
 
+        //planos/{id}
         [HttpPut("{id:int}")]
-        public ActionResult<PlanoResponseDTO> Put(int id, PlanoRequestDTO dto)
+        public async Task<ActionResult<PlanoResponseDTO>> Put(int id, PlanoRequestDTO dto)
         {
-            var atualizado = _planoService.Atualizar(id, dto);
+            var atualizado = await _planoService.AtualizarAsync(id, dto);
             return atualizado is null ? NotFound("Plano não localizado.") : Ok(atualizado);
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
-            var removido = _planoService.Remover(id);
+            var removido = await _planoService.RemoverAsync(id);
             return removido ? Ok(new { mensagem = "Plano removido." }) : NotFound("Plano não localizado.");
         }
     }
