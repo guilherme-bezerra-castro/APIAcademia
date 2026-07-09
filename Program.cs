@@ -1,4 +1,5 @@
 using APIAcademia.Context;
+using APIAcademia.Middlewares;
 using APIAcademia.Repositories;
 using APIAcademia.Services;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
