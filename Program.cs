@@ -1,4 +1,5 @@
 using APIAcademia.Context;
+using APIAcademia.Filters;
 using APIAcademia.Middlewares;
 using APIAcademia.Repositories;
 using APIAcademia.Services;
@@ -27,6 +28,11 @@ builder.Services.AddScoped<IPlanoRepository, PlanoRepository>();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<LogActionFilter>();
+});
 
 var app = builder.Build();
 
