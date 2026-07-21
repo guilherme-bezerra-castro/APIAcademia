@@ -6,6 +6,7 @@ namespace APIAcademia.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class AuthController : ControllerBase
     {
         private readonly TokenService _tokenService;
@@ -25,7 +26,7 @@ namespace APIAcademia.Controllers
             }
 
             var (token, expiracao) = _tokenService.GerarToken(request.Email);
-            return Ok(new LoginResponse(token, expiracao));
+            return Ok(new LoginResponse { Token = token, Expiracao = expiracao });
         }
     }
 }
