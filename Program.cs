@@ -38,12 +38,20 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("PermitirTudo", policy =>
+    if (builder.Environment.IsDevelopment())
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
+        options.AddPolicy("PoliticaCors", policy =>
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader());
+    }
+    else
+    {
+        options.AddPolicy("PoliticaCors", policy =>
+            policy.WithOrigins("https://seu-front.azurestaticapps.net") // trocar quando tiver front
+                  .AllowAnyMethod()
+                  .AllowAnyHeader());
+    }
 });
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -66,14 +74,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                                           Encoding.UTF8.GetBytes(secretKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
         };
     });
 
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "APIAcademia", Version = "v1" });
+
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -83,6 +91,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Cole o token JWT aqui (sem o prefixo Bearer)"
     });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -105,11 +114,14 @@ app.UseForwardedHeaders();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
-app.UseCors("PermitirTudo");
+app.UseCors("PoliticaCors");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
