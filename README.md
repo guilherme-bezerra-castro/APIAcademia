@@ -1,89 +1,159 @@
 # APIAcademia
 
-> Web API REST para gerenciamento de alunos e planos de uma academia, desenvolvida com ASP.NET Core e Entity Framework Core.
-
-O APIAcademia é um projeto de estudo e portfólio que simula o back-end de um sistema de gerenciamento de academia. A API permite cadastrar e gerenciar alunos e planos de assinatura, com foco em boas práticas de desenvolvimento como separação de responsabilidades, tratamento global de erros e validação de dados.
+API REST para gerenciamento de alunos e planos de uma academia, desenvolvida como projeto de portfólio. A aplicação cobre o ciclo completo de um backend moderno: autenticação, validação de entrada, tratamento de erros, acesso a dados com repository pattern, operações assíncronas e deploy em produção.
 
 ## Tecnologias
-- .NET 8
-- ASP.NET Core Web API
-- Entity Framework Core
-- MySQL
-- Swagger
 
-## Arquitetura e padrões
+- **C# / ASP.NET Core 8** — framework principal
+- **Entity Framework Core 8** com **MySQL (Pomelo)** — ORM e banco de dados
+- **JWT Bearer** — autenticação stateless
+- **FluentValidation** — validação declarativa de entrada
+- **Repository Pattern** — separação entre lógica de negócio e acesso a dados
+- **Async/Await** — operações de banco completamente assíncronas
+- **Middleware** customizado para tratamento centralizado de exceções
+- **Action Filter** para logging de requisições
+- **Paginação** com Skip/Take no EF Core
 
-- **DTOs** — separação entre as entidades do banco e os dados expostos pela API, implementados como `record` do C#
-- **Services** — camada de serviço isolando a lógica de negócio dos controllers
-- **Model Binding** — suporte a filtros via query string (`?ativo=true&planoId=1`)
-- **Injeção de dependência** — configurada via `Program.cs` com tempo de vida `Scoped`
+## API em Produção
+
+**Base URL:** `https://apiacademia-production.up.railway.app`
+
+> O serviço usa o plano gratuito do Railway. A primeira requisição após um períodode inatividade pode levar alguns segundos enquanto o servidor inicializa. As requisições seguintes respondem normalmente.
 
 ## Endpoints
 
-### Alunos
+| Método | Rota | Descrição | Autenticação |
+|--------|------|-----------|:------------:|
+| POST | `/Auth/login` | Gera token JWT | Não |
+| GET | `/health` | Status da API | Não |
+| GET | `/Alunos` | Lista todos os alunos | Sim |
+| GET | `/Alunos/{id}` | Busca aluno por ID | Sim |
+| GET | `/Alunos/primeiro` | Retorna o primeiro aluno | Sim |
+| GET | `/Alunos/paginado?pagina=1&itensPorPagina=10` | Lista paginada | Sim |
+| GET | `/Alunos/filtrar?ativo=true&planoId=1` | Filtra por status e plano | Sim |
+| POST | `/Alunos` | Cria novo aluno | Sim |
+| PUT | `/Alunos/{id}` | Atualiza aluno completo | Sim |
+| PATCH | `/Alunos/{id}/status` | Atualiza status (ativo/inativo) | Sim |
+| DELETE | `/Alunos/{id}` | Remove aluno | Sim |
+| GET | `/Planos` | Lista todos os planos | Sim |
+| GET | `/Planos/{id}` | Busca plano por ID | Sim |
+| POST | `/Planos` | Cria novo plano | Sim |
+| PUT | `/Planos/{id}` | Atualiza plano | Sim |
+| DELETE | `/Planos/{id}` | Remove plano | Sim |
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/alunos` | Lista todos os alunos |
-| GET | `/alunos/{id}` | Busca aluno por ID |
-| GET | `/alunos/primeiro` | Retorna o primeiro aluno cadastrado |
-| GET | `/alunos/filtrar?ativo=true&planoId=1` | Filtra alunos por status e plano |
-| POST | `/alunos` | Cadastra novo aluno |
-| PUT | `/alunos/{id}` | Atualiza dados do aluno |
-| PATCH | `/alunos/{id}/status` | Ativa ou desativa um aluno |
-| PUT | `/alunos/{id}/plano` | Troca o plano de um aluno |
-| DELETE | `/alunos/{id}` | Remove um aluno |
+## Como testar
 
-### Planos
+Os endpoints protegidos exigem um token JWT no header `Authorization`. O fluxo é sempre o mesmo: fazer login para obter o token, depois usá-lo nas requisições seguintes.
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | `/planos` | Lista todos os planos |
-| GET | `/planos/{id}` | Busca plano por ID |
-| GET | `/planos/alunos` | Lista planos com seus alunos vinculados |
-| GET | `/planos/{id}/alunos` | Lista alunos de um plano específico |
-| POST | `/planos` | Cria novo plano |
-| PUT | `/planos/{id}` | Atualiza um plano |
-| DELETE | `/planos/{id}` | Remove um plano |
+### Passo 1 — Obter o token
 
-## Como executar localmente
-
-### Pré-requisitos
-
-- .NET 8 SDK
-- MySQL
-
-### Passos
-
-1. Clone o repositório
-
-```bash
-git clone https://github.com/guilherme-bezerra-castro/APIAcademia.git
-cd APIAcademia
+```powershell
+# PowerShell
+$body = '{"email":"admin@academia.com","senha":"senha123"}'
+$response = Invoke-WebRequest -Uri "https://apiacademia-production.up.railway.app/Auth/login" -Method POST -ContentType "application/json" -Body $body -UseBasicParsing
+$token = ($response.Content | ConvertFrom-Json).token
 ```
 
-2. Configure a connection string no `appsettings.json`
+```bash
+# curl (Linux/macOS)
+curl -X POST https://apiacademia-production.up.railway.app/Auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@academia.com","senha":"senha123"}'
+```
+
+### Passo 2 — Usar o token nas requisições
+
+```powershell
+# PowerShell — listar alunos
+Invoke-WebRequest -Uri "https://apiacademia-production.up.railway.app/Alunos" -Headers @{ Authorization = "Bearer $token" } -UseBasicParsing
+
+# PowerShell — buscar aluno por ID
+Invoke-WebRequest -Uri "https://apiacademia-production.up.railway.app/Alunos/1" -Headers @{ Authorization = "Bearer $token" } -UseBasicParsing
+
+# PowerShell — listar com paginação
+Invoke-WebRequest -Uri "https://apiacademia-production.up.railway.app/Alunos/paginado?pagina=1&itensPorPagina=3" -Headers @{ Authorization = "Bearer $token" } -UseBasicParsing
+
+# PowerShell — filtrar alunos ativos do plano 1
+Invoke-WebRequest -Uri "https://apiacademia-production.up.railway.app/Alunos/filtrar?ativo=true&planoId=1" -Headers @{ Authorization = "Bearer $token" } -UseBasicParsing
+
+# PowerShell — atualizar status de um aluno (PATCH)
+Invoke-WebRequest -Uri "https://apiacademia-production.up.railway.app/Alunos/1/status" -Method PATCH -ContentType "application/json" -Body "false" -Headers @{ Authorization = "Bearer $token" } -UseBasicParsing
+```
+
+```bash
+# curl — listar alunos
+curl https://apiacademia-production.up.railway.app/Alunos \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
+
+# curl — buscar aluno por ID
+curl https://apiacademia-production.up.railway.app/Alunos/1 \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
+```
+
+### Exemplo de resposta — GET /Alunos/1
 
 ```json
-"ConnectionStrings": {
-  "DefaultConnection": "server=localhost;database=AcademiaDb;user=root;password=[suasenha]"
+{
+  "alunoId": 1,
+  "nome": "José da Silva",
+  "email": "josedasilva@email.com",
+  "imagemURL": "josedasilva.jpg",
+  "ativo": true,
+  "dataNascimento": "1975-08-22T00:00:00",
+  "planoId": 1,
+  "planoNome": "Saúde"
 }
 ```
 
-3. Aplique as migrations para criar o banco
+### Exemplo de resposta — GET /Alunos/paginado
 
-```bash
-dotnet ef database update
+```json
+{
+  "totalItens": 6,
+  "totalPaginas": 2,
+  "paginaAtual": 1,
+  "itensPorPagina": 3,
+  "dados": [...]
+}
 ```
 
-4. Execute a aplicação
+## Como rodar localmente
+
+**Pré-requisitos:** .NET 8 SDK e MySQL instalado localmente.
+
+**1.** Clone o repositório:
 
 ```bash
+git clone https://github.com/seu-usuario/APIAcademia.git
+cd APIAcademia
+```
+
+**2.** Crie o arquivo `APIAcademia/appsettings.Development.json` com suas configurações locais (este arquivo não é commitado):
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=ApiAcademiaDB;Uid=seu_usuario;Pwd=sua_senha;"
+  },
+  "Jwt": {
+    "SecretKey": "chave-local-com-pelo-menos-32-caracteres",
+    "Issuer": "APIAcademia",
+    "Audience": "APIAcademiaClientes",
+    "ExpiracaoHoras": 8
+  }
+}
+```
+
+**3.** Aplique as migrations e inicie:
+
+```bash
+cd APIAcademia
+dotnet ef database update
 dotnet run
 ```
 
-5. Acesse a documentação interativa no Swagger
+O Swagger estará disponível em `https://localhost:7284/swagger`.
 
-```
-https://localhost:{porta}/swagger
-```
+---
+
+> Desenvolvido por **Guilherme** — estudante de Análise e Desenvolvimento de Sistemas no IFSP, em busca de estágio ou vaga júnior em desenvolvimento back-end.
